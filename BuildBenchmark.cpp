@@ -50,14 +50,14 @@ void testSize(istream &in, ostream &summary, int persize, int sigma) {
     total_mem += mem;
     total_time += millis;
 
-    log << millis << ";" << mem;
+    log << millis << ";" << mem << "\n";
   }
   summary << sigma << ";"
           << size << ";"
           << persize << ";"
           << total_time << ";"
           << total_time/persize << ";"
-          << total_mem/persize << "\n";
+          << total_mem/persize << endl;
 
   cout << "Total time [ms]: " << total_time << "\n"
        << "Average time [ms]: " << total_time/persize << "\n\n";
@@ -67,7 +67,16 @@ void testSize(istream &in, ostream &summary, int persize, int sigma) {
 
 int main() {
   ifstream in;
-  ofstream summary;
+  ofstream summary_wmc, summary_wm, summary_wt, summary_wtc;
+  summary_wm.open("wavelet-matrix");
+  summary_wm << "Sigma;Size;Total time[ms];Avg Time[ms];Avg Mem[bytes]\n";
+  summary_wmc.open("wavelet-matrix-compression");
+  summary_wmc << "Sigma;Size;Number;Total time[ms];Avg Time[ms];Avg Mem[bytes]\n";
+  summary_wt.open("wavelet-tree");
+  summary_wt << "Sigma;Size;Number;Total time[ms];Avg Time[ms];Avg Mem[bytes]\n";
+  summary_wtc.open("wavelet-tree-compression");
+  summary_wtc << "Sigma;Size;Number;Total time[ms];Avg Time[ms];Avg Mem[bytes]\n";
+
   for (int sigma : sigmas) {
     in.open("s"+to_string(sigma));
     rawRead<int>(in);
@@ -81,11 +90,8 @@ int main() {
     cout << "Wavelet Matrix\n";
     cout << "--------------" << endl;
     in.seekg(p);
-    summary.open("wavelet-matrix");
-    summary << "Sigma;Size;Total time[ms];Avg Time[ms];Avg Mem[bytes]\n";
     for (int i = 0; i < sizes; ++i)
-      testSize<WaveMatrix<BitmapRankVec>>(in, summary, persize, sigma);
-    summary.close();
+      testSize<WaveMatrix<BitmapRankVec>>(in, summary_wm, persize, sigma);
     cout << endl;
 
 
@@ -93,11 +99,8 @@ int main() {
     cout << "Wavelet Matrix with compression\n";
     cout << "-------------------------------" << endl;
     in.seekg(p);
-    summary.open("wavelet-matrix-compression");
-    summary << "Sigma;Size;Number;Total time[ms];Avg Time[ms];Avg Mem[bytes]\n";
     for (int i = 0; i < sizes; ++i)
-      testSize<WaveMatrix<BitmapRank>>(in, summary, persize, sigma);
-    summary.close();
+      testSize<WaveMatrix<BitmapRank>>(in, summary_wmc, persize, sigma);
     cout << endl;
 
 
@@ -105,11 +108,8 @@ int main() {
     cout << "Wavelet Tree\n";
     cout << "------------" << endl;
     in.seekg(p);
-    summary.open("wavelet-tree");
-    summary << "Sigma;Size;Number;Total time[ms];Avg Time[ms];Avg Mem[bytes]\n";
     for (int i = 0; i < sizes; ++i)
-      testSize<WaveTree<BitmapRankVec>>(in, summary, persize, sigma);
-    summary.close();
+      testSize<WaveTree<BitmapRankVec>>(in, summary_wt, persize, sigma);
     cout << endl;
 
 
@@ -117,15 +117,17 @@ int main() {
     cout << "Wavelet Tree with compression\n";
     cout << "-----------------------------" << endl;
     in.seekg(p);
-    summary.open("wavelet-tree-compression");
-    summary << "Sigma;Size;Number;Total time[ms];Avg Time[ms];Avg Mem[bytes]\n";
     for (int i = 0; i < sizes; ++i)
-      testSize<WaveTree<BitmapRank>>(in, summary, persize, sigma);
-    summary.close();
+      testSize<WaveTree<BitmapRank>>(in, summary_wtc, persize, sigma);
     cout << endl;
 
     in.close();
   }
+
+  summary_wm.close();
+  summary_wmc.close();
+  summary_wt.close();
+  summary_wtc.close();
 
   return 0;
 }
