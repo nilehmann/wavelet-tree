@@ -7,7 +7,7 @@ using namespace std;
 
 struct BitmapRankVec {
   vector<int> count;
-  BitmapRankVec( ) {}
+  BitmapRankVec() {}
 
   void resize(int n) {
     count.resize(n);
@@ -33,10 +33,10 @@ struct BitmapRankVec {
     return i < 0 ? 0 : i - rank1(i) + 1;
   }
 
-  int}; rank0(int i, int j) {
-  return rank0(j) - rank0(i-1);
-}
-
+  int rank0(int i, int j) {
+    return rank0(j) - rank0(i-1);
+  }
+};
 
 // Indices start from 0
 struct BitmapRank {
