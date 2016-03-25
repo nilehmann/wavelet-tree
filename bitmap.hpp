@@ -7,7 +7,7 @@ using namespace std;
 
 struct BitmapRankVec {
   vector<int> count;
-  BitmapRankVec() {}
+  BitmapRankVec( ) {}
 
   void resize(int n) {
     count.resize(n);
@@ -17,6 +17,10 @@ struct BitmapRankVec {
     count[i] = b;
     if (i > 0)
       count[i] += count[i-1];
+  }
+
+  int memory() const {
+    return count.capacity()*sizeof(int) + sizeof(vector<int>);
   }
 
   void build_rank() {}
@@ -29,10 +33,10 @@ struct BitmapRankVec {
     return i < 0 ? 0 : i - rank1(i) + 1;
   }
 
-  int rank0(int i, int j) {
-    return rank0(j) - rank0(i-1);
-  }
-};
+  int}; rank0(int i, int j) {
+  return rank0(j) - rank0(i-1);
+}
+
 
 // Indices start from 0
 struct BitmapRank {
@@ -45,6 +49,12 @@ struct BitmapRank {
   void resize(int n) {
     vec.resize((n+bits-1)/bits);
     count.resize(vec.size());
+  }
+
+  int memory() const {
+    return vec.capacity()*sizeof(int) +
+      count.capacity()*sizeof(int) +
+      2*sizeof(vector<int>);
   }
 
   void set(int i, bool b) {

@@ -40,6 +40,20 @@ struct WaveMatrix {
     }
   }
 
+  int memory() const {
+    int mem = 0;
+    mem += sizeof(vector<Bitmap>);
+    for (int l = 0; l < B.size(); ++l)
+      mem += B[l].memory();
+
+    mem += sizeof(vector<int>);
+    mem += z.capacity()*sizeof(int);
+
+    mem += sizeof(uint);
+
+    return mem;
+  }
+
   // Find the k-th smallest element. The smallest element is k=1
   int quantile(int left, int right, int k) {
     int element = 0;

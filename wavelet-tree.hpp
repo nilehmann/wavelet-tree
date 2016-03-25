@@ -43,6 +43,15 @@ class WaveTree {
   }
 
 public:
+  int memory() const {
+    int mem = 0;
+    mem += 2*sizeof(int);
+
+    mem += sizeof(vector<Bitmap>);
+    for (int i = 0; i < r0.size(); ++i)
+      mem += r0[i].memory();
+    return mem;
+  }
   //arr[i] in [0,sigma)
   WaveTree(vector<int> &arr, int sigma) {
     n = arr.size(); s = sigma;
