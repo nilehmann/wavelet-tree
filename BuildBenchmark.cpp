@@ -57,7 +57,7 @@ void testSize(istream &in, ostream &summary, int persize, int sigma) {
           << persize << ";"
           << total_time << ";"
           << total_time/persize << ";"
-          << total_mem/persize << endl;
+          << 1.0*total_mem/persize << endl;
 
   cout << "Total time [ms]: " << total_time << "\n"
        << "Average time [ms]: " << total_time/persize << "\n\n";
@@ -69,7 +69,7 @@ int main() {
   ifstream in;
   ofstream summary_wmc, summary_wm, summary_wt, summary_wtc;
   summary_wm.open("wavelet-matrix");
-  summary_wm << "Sigma;Size;Total time[ms];Avg Time[ms];Avg Mem[bytes]\n";
+  summary_wm << "Sigma;Size;Number;Total time[ms];Avg Time[ms];Avg Mem[bytes]\n";
   summary_wmc.open("wavelet-matrix-compression");
   summary_wmc << "Sigma;Size;Number;Total time[ms];Avg Time[ms];Avg Mem[bytes]\n";
   summary_wt.open("wavelet-tree");
