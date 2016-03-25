@@ -50,7 +50,7 @@ void testSize(istream &in, ostream &summary, int persize, int sigma) {
     total_mem += mem;
     total_time += millis;
 
-    log << millis << ";" << mem;
+    log << millis << ";" << mem << "\n";
   }
   summary << sigma << ";"
           << size << ";"
