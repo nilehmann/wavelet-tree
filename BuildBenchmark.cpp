@@ -33,10 +33,10 @@ void testSize(istream &in, ostream &summary, int persize, int sigma) {
   vector<int> seq;
 
   log.open("s"+to_string(sigma)+"n"+to_string(size));
-  log << "Time [ms]; Memory [bytes]\n";
+  log << "Time [ms]; Memory [MB]\n";
 
   double total_time = 0;
-  int total_mem = 0;
+  double total_mem = 0;
   for (int i = 0; i < persize; ++i) {
     rawRead(in, seq, size);
 
@@ -45,7 +45,7 @@ void testSize(istream &in, ostream &summary, int persize, int sigma) {
     timer.stop();
 
     auto millis = timer.elapsed().wall/1000000.0;
-    int mem = wavelet.memory();
+    double mem = wavelet.memory()/1024.0/1024;
 
     total_mem += mem;
     total_time += millis;
@@ -69,13 +69,13 @@ int main() {
   ifstream in;
   ofstream summary_wmc, summary_wm, summary_wt, summary_wtc;
   summary_wm.open("wavelet-matrix");
-  summary_wm << "Sigma;Size;Number;Total time[ms];Avg Time[ms];Avg Mem[bytes]\n";
+  summary_wm << "Sigma;Size;Number;Total time[ms];Avg Time[ms];Avg Mem[MB]\n";
   summary_wmc.open("wavelet-matrix-compression");
-  summary_wmc << "Sigma;Size;Number;Total time[ms];Avg Time[ms];Avg Mem[bytes]\n";
+  summary_wmc << "Sigma;Size;Number;Total time[ms];Avg Time[ms];Avg Mem[MB]\n";
   summary_wt.open("wavelet-tree");
-  summary_wt << "Sigma;Size;Number;Total time[ms];Avg Time[ms];Avg Mem[bytes]\n";
+  summary_wt << "Sigma;Size;Number;Total time[ms];Avg Time[ms];Avg Mem[MB]\n";
   summary_wtc.open("wavelet-tree-compression");
-  summary_wtc << "Sigma;Size;Number;Total time[ms];Avg Time[ms];Avg Mem[bytes]\n";
+  summary_wtc << "Sigma;Size;Number;Total time[ms];Avg Time[ms];Avg Mem[MB]\n";
 
   for (int sigma : sigmas) {
     in.open("s"+to_string(sigma));
