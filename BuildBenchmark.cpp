@@ -36,7 +36,7 @@ void testSize(istream &in, ostream &summary, int persize, int sigma) {
   log << "Time [ms]; Memory [bytes]\n";
 
   double total_time = 0;
-  int total_mem = 0;
+  double total_mem = 0;
   for (int i = 0; i < persize; ++i) {
     rawRead(in, seq, size);
 
@@ -57,7 +57,7 @@ void testSize(istream &in, ostream &summary, int persize, int sigma) {
           << persize << ";"
           << total_time << ";"
           << total_time/persize << ";"
-          << 1.0*total_mem/persize << endl;
+          << 1.0*total_mem/persize/1024/1024 << endl;
 
   cout << "Total time [ms]: " << total_time << "\n"
        << "Average time [ms]: " << total_time/persize << "\n\n";

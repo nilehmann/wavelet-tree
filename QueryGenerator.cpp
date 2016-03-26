@@ -11,21 +11,15 @@
 #include "utils.hpp"
 using namespace std;
 
-vector<int> sizes = {1,
-                     10,
-                     100,
+vector<int> sizes = {100,
                      1000,
                      10000,
                      100000,
-                     1000000,
-                     10000000};
+                     1000000};
 vector<int> sigmas = {1000,
                       10000,
                       100000,
-                      1000000,
-                      10000000,
-                      100000000,
-                      1000000000};
+                      1000000};
 
 int nqueries = 100000;
 
@@ -76,16 +70,17 @@ int main (int argc, char *argv[]) {
 
       // Generate and print sequence
       auto seq = genSequence(size, sigma);
-      out << seq.size() << " " << sigma << "\n"
-          << seq << "\n";
+      rawPrint(out, seq.size());
+      rawPrint(out, sigma);
+      rawPrint(out, seq);
 
       // Generate and print queries
-      out << nqueries << "\n";
+      rawPrint(out, nqueries);
       for (int i = 0; i < nqueries; ++i)
         switch (query) {
-        case 1: out << genRankQuery(size, sigma) << "\n"; break;
-        case 2: out << genQuantileQuery(size) << "\n"; break;
-        case 3: out << genRangeQuery(size, sigma) << "\n"; break;
+        case 1: rawPrint(out,genRankQuery(size, sigma)); break;
+        case 2: rawPrint(out,genQuantileQuery(size)); break;
+        case 3: rawPrint(out,genRangeQuery(size, sigma)); break;
         default: cout << "Invalid query type\n";
         }
       out.close();
