@@ -57,7 +57,7 @@ void testSize(istream &in, ostream &summary, int persize, int sigma) {
           << persize << ";"
           << total_time << ";"
           << total_time/persize << ";"
-          << 1.0*total_mem/persize << endl;
+          << 1.0*total_mem/persize/1024/1024 << endl;
 
   cout << "Total time [ms]: " << total_time << "\n"
        << "Average time [ms]: " << total_time/persize << "\n\n";

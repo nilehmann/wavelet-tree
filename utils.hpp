@@ -2,10 +2,13 @@
 #define UTILS_HPP
 
 #include <vector>
+#include <map>
 #include <random>
+#include <algorithm>
 #include <tuple>
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 
 using namespace std;
 
@@ -45,6 +48,45 @@ vector<int> genSequence(int size, int sigma) {
     vec[i] = dis(gen);
 
   return vec;
+}
+
+vector<int> genNormalSequence(int size, int mean) {
+  normal_distribution<> dis(mean, mean/5.0);
+  std::map<int, int> hist;
+  int sum = 0;
+  int sigma = 0;
+  while (sum < size) {
+    int n = round(dis(gen));
+    if (n <= 0)
+      continue;
+    if (sum + n > size)
+      n = size - sum;
+    sum += n;
+    hist[n]++;
+    sigma++;
+  }
+
+  vector<int> nums(sigma);
+  for (int i = 0; i < nums.size(); ++i)
+    nums[i] = i;
+  std::random_shuffle(nums.begin(), nums.end());
+
+  vector<int> seq(size);
+  int i = 0;
+  int l = 0;
+  for (auto p : hist) {
+    cout << p.first << " " << p.second << "\n";
+    // How many numbers appears this many times
+    for (int k = 0; k < p.second; k++) {
+      // How many times the number appears
+      for (int j = 0; j < p.first; j++)
+        seq[l++] = nums[i];
+      i++;
+    }
+  }
+  random_shuffle(seq.begin(), seq.end());
+
+  return seq;
 }
 
 template<class T>
