@@ -14,25 +14,23 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
-#include <chrono>
 
 using namespace boost::timer;
 
-vector<int> sigmas = {1000,
-                      10000,
-                      100000,
-                      1000000};
+vector<double> sigmas = {1, .75, .5, .25};
 
 template<class Wavelet>
-void testSize(istream &in, ostream &summary, int persize, int sigma) {
+void testSize(istream &in, ostream &summary, int persize) {
   ofstream log;
   cpu_timer timer;
   int size = rawRead<int>(in);
+  int sigma = rawRead<int>(in);
   cout << "Sequence size: " << size << endl;
+  cout << "Sigma: " << sigma << endl;
 
   vector<int> seq;
 
-  log.open("s"+to_string(sigma)+"n"+to_string(size));
+  log.open("logs/s"+to_string(sigma)+"n"+to_string(size));
   log << "Time [ms]; Memory [MB]\n";
 
   double total_time = 0;
@@ -43,6 +41,7 @@ void testSize(istream &in, ostream &summary, int persize, int sigma) {
     timer.start();
     Wavelet wavelet(seq, sigma);
     timer.stop();
+
 
     auto millis = timer.elapsed().wall/1000000.0;
     double mem = wavelet.memory()/1024.0/1024;
@@ -77,9 +76,10 @@ int main() {
   summary_wtc.open("wavelet-tree-compression");
   summary_wtc << "Sigma;Size;Number;Total time[ms];Avg Time[ms];Avg Mem[MB]\n";
 
-  for (int sigma : sigmas) {
-    in.open("s"+to_string(sigma));
-    rawRead<int>(in);
+  for (auto s : {1.0}) {
+    char buf[256];
+    sprintf(buf, "%.2f", s);
+    in.open("s"+string(buf));
 
     int sizes = rawRead<int>(in);
     int persize = rawRead<int>(in);
@@ -87,39 +87,39 @@ int main() {
     cout << persize << endl << endl;
     auto p = in.tellg();
 
-    cout << "Wavelet Matrix\n";
-    cout << "--------------" << endl;
-    in.seekg(p);
-    for (int i = 0; i < sizes; ++i)
-      testSize<WaveMatrix<BitmapRankVec>>(in, summary_wm, persize, sigma);
-    cout << endl;
-
-
-
-    cout << "Wavelet Matrix with compression\n";
-    cout << "-------------------------------" << endl;
-    in.seekg(p);
-    for (int i = 0; i < sizes; ++i)
-      testSize<WaveMatrix<BitmapRank>>(in, summary_wmc, persize, sigma);
-    cout << endl;
-
-
 
     cout << "Wavelet Tree\n";
     cout << "------------" << endl;
     in.seekg(p);
     for (int i = 0; i < sizes; ++i)
-      testSize<WaveTree<BitmapRankVec>>(in, summary_wt, persize, sigma);
+      testSize<WaveTree<BitmapRankVec>>(in, summary_wt, persize);
     cout << endl;
 
+
+    cout << "Wavelet Matrix\n";
+    cout << "--------------" << endl;
+    in.seekg(p);
+    for (int i = 0; i < sizes; ++i)
+      testSize<WaveMatrix<BitmapRankVec>>(in, summary_wm, persize);
+    cout << endl;
 
 
     cout << "Wavelet Tree with compression\n";
     cout << "-----------------------------" << endl;
     in.seekg(p);
     for (int i = 0; i < sizes; ++i)
-      testSize<WaveTree<BitmapRank>>(in, summary_wtc, persize, sigma);
+      testSize<WaveTree<BitmapRank>>(in, summary_wtc, persize);
     cout << endl;
+
+
+    cout << "Wavelet Matrix with compression\n";
+    cout << "-------------------------------" << endl;
+    in.seekg(p);
+    for (int i = 0; i < sizes; ++i)
+      testSize<WaveMatrix<BitmapRank>>(in, summary_wmc, persize);
+    cout << endl;
+
+
 
     in.close();
   }

@@ -50,6 +50,18 @@ vector<int> genSequence(int size, int sigma) {
   return vec;
 }
 
+vector<int> genSeqContiguous(int size, int sigma) {
+  uniform_int_distribution<> dis(0, sigma - 1);
+
+  vector<int> seq(size);
+  for (int i = 0; i < sigma; ++i)
+    seq[i] = i;
+  for (int i = sigma; i < size; ++i)
+    seq[i] = dis(gen);
+  random_shuffle(seq.begin(), seq.end());
+  return seq;
+}
+
 vector<int> genNormalSequence(int size, int mean) {
   normal_distribution<> dis(mean, mean/5.0);
   std::map<int, int> hist;
@@ -67,7 +79,7 @@ vector<int> genNormalSequence(int size, int mean) {
   }
 
   vector<int> nums(sigma);
-  for (int i = 0; i < nums.size(); ++i)
+  for (int i = 0; i < (int)nums.size(); ++i)
     nums[i] = i;
   std::random_shuffle(nums.begin(), nums.end());
 
@@ -110,7 +122,7 @@ T rawRead(istream &stream) {
 template<class T>
 void rawRead(istream &stream, vector<T> &vec, int n) {
   vec.resize(n);
-  for (int i = 0; i < vec.size(); i++)
+  for (int i = 0; i < (int)vec.size(); i++)
     vec[i] = rawRead<T>(stream);
 }
 
@@ -131,7 +143,7 @@ ostream& operator<<(ostream& stream, tuple<int, int, int, int> t) {
 
 
 ostream& operator<<(ostream& stream, const vector<int> &vec) {
-  for (int i = 0; i < vec.size(); ++i) {
+  for (int i = 0; i < (int)vec.size(); ++i) {
     if (i > 0)
       stream << " ";
     stream << vec[i];

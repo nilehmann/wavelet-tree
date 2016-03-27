@@ -1,4 +1,9 @@
 query_gen
 build_gen
 build_benchmark
-s1*
+query_benchmark
+range_tests
+quantile_tests
+build_tests
+rank_tests
+

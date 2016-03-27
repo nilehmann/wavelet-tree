@@ -15,43 +15,33 @@ vector<int> sizes = {100,
                      10000,
                      100000,
                      1000000};
-                     // 10000000};
-vector<int> sigmas = {1000,
-                      10000,
-                      100000,
-                      1000000};
-                      // 10000000,
-                      // 100000000,
-                      // 1000000000};
+vector<double> sigmas = {1, .75, .5, .25};
 
 int persize = 1000;
 
-int main(int argc, char *argv[]) {
-  vector<int> seq = genNormalSequence(100, 20);
-  cout << seq << "\n";
+int main() {
+  for (auto s : sigmas) {
+    ofstream out;
+    char buf[256];
+    sprintf(buf, "%.2f", s);
+    out.open("s"+string(buf));
+    rawPrint(out, (int)sizes.size());
+    rawPrint(out, persize);
 
+    for (int size : sizes) {
+      int sigma = s*size;
+      cout << "Generating sequences with s="
+           << sigma << " and n=" << size << endl;
 
-  // for (int sigma : sigmas) {
-  //   ofstream out;
-  //   out.open("s"+to_string(sigma));
-  //   // out << sigma << endl;
-  //   rawPrint(out, sigma);
-  //   // out << sizes.size() << " " << persize << endl;
-  //   rawPrint(out, (int)sizes.size());
-  //   rawPrint(out, persize);
-
-  //   for (int size : sizes) {
-  //     cout << "Generating sequences with s=" << sigma << " and n=" << size << endl;
-  //     // out << size << endl;
-  //     rawPrint(out, size);
-  //     for (int i = 0; i < persize; ++i) {
-  //       auto seq = genSequence(size, sigma);
-  //       // out << seq << "\n";
-  //       rawPrint(out, seq);
-  //     }
-  //   }
-  //   out.close();
-  // }
+      rawPrint(out, size);
+      rawPrint(out, sigma);
+      for (int i = 0; i < persize; ++i) {
+        auto seq = genSeqContiguous(size, sigma);
+        rawPrint(out, seq);
+      }
+    }
+    out.close();
+  }
 
   return 0;
 }

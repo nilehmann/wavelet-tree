@@ -20,6 +20,7 @@ struct WaveMatrix {
   uint height;
   vector<Bitmap> B;
   vector<int> z;
+  int a;
 
   WaveMatrix(vector<int> &S) :
     WaveMatrix(S, *max_element(S.begin(), S.end()) + 1) {}
@@ -43,7 +44,7 @@ struct WaveMatrix {
   int memory() const {
     int mem = 0;
     mem += sizeof(vector<Bitmap>);
-    for (int l = 0; l < B.size(); ++l)
+    for (int l = 0; l < (int)B.size(); ++l)
       mem += B[l].memory();
 
     mem += sizeof(vector<int>);
@@ -55,25 +56,26 @@ struct WaveMatrix {
   }
 
   // Find the k-th smallest element. The smallest element is k=1
-  int quantile(int left, int right, int k) {
+  int quantile(int k, int i, int j) {
     int element = 0;
     for (uint l = 0; l < height; ++l) {
-      int r = B[l].rank0(left, right);
+      int r = B[l].rank0(i, j);
       if (r >= k) {
-        left = B[l].rank0(left-1);
-        right = B[l].rank0(right) - 1;
+        i = B[l].rank0(i-1);
+        j = B[l].rank0(j) - 1;
       } else {
-        left = z[l] + B[l].rank1(left-1);
-        right = z[l] + B[l].rank1(right) - 1;
+        i = z[l] + B[l].rank1(i-1);
+        j = z[l] + B[l].rank1(j) - 1;
         k -= r;
         set_bit(element, height - l - 1);
       }
     }
     return element;
   }
+  int getA() {return a;}
 
   // Count occurrences of number c until position i
-  int rank(int c, int i) {
+  int rank(int c, int i) const {
     int p = -1;
     for (uint l = 0; l < height; ++l) {
       if (get_bit(c, height - l - 1)) {
@@ -90,11 +92,11 @@ struct WaveMatrix {
   // Count number of occurrences of numbers in the range [a, b]
   // present in the sequence at range [i, j], ie, if representing a grid it
   // counts number of points in the specified rectangle.
-  int range(int i, int j, int a, int b) {
+  int range(int i, int j, int a, int b) const {
     return range(i, j, a, b, 0, (1 << height)-1);
   }
 
-  int range(int i, int j, int a, int b, int L, int U, int l=0) {
+  int range(int i, int j, int a, int b, int L, int U, int l=0) const {
     if (b < L || U < a)
         return 0;
 

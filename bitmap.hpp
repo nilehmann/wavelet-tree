@@ -62,7 +62,7 @@ struct BitmapRank {
   }
 
   void build_rank() {
-    for (int i = 1; i < vec.size(); ++i)
+    for (int i = 1; i < (int)vec.size(); ++i)
       count[i] = count[i-1] + popcnt(vec[i-1]);
   }
 

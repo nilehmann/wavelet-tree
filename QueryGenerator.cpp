@@ -16,12 +16,10 @@ vector<int> sizes = {100,
                      10000,
                      100000,
                      1000000};
-vector<int> sigmas = {1000,
-                      10000,
-                      100000,
-                      1000000};
 
-int nqueries = 100000;
+vector<double> sigmas = {1, .75, .5, .25};
+
+int nqueries = 1000000;
 
 tuple<int, int> genRankQuery(int size, int sigma) {
   uniform_int_distribution<> dis(0, sigma - 1);
@@ -54,23 +52,27 @@ genRangeQuery(int size, int sigma) {
 
 int main (int argc, char *argv[]) {
   if (argc < 2) {
-    cout << "Usage: " << argv[0] << " query nqueries\n";
+    cout << "Usage: " << argv[0] << " query [nqueries]\n";
     cout << "1: rank\n";
     cout << "2: quantile\n";
     cout << "3: range\n";
+    exit(0);
   }
   int query = atoi(argv[1]);
   if (argc >= 3)
     nqueries = atoi(argv[2]);
 
-  for (int sigma : sigmas) {
+  for (double s : sigmas) {
     for (int size : sizes) {
+      char buf[256];
+      sprintf(buf, "%.2f", s);
+      int sigma = s*size;
       ofstream out;
-      out.open("s"+to_string(sigma)+"n"+to_string(size));
+      out.open("s"+string(buf)+"n"+to_string(size));
 
       // Generate and print sequence
-      auto seq = genSequence(size, sigma);
-      rawPrint(out, seq.size());
+      auto seq = genSeqContiguous(size, sigma);
+      rawPrint(out, (int)seq.size());
       rawPrint(out, sigma);
       rawPrint(out, seq);
 
