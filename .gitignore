@@ -6,4 +6,5 @@ range_tests
 quantile_tests
 build_tests
 rank_tests
+*.o
 

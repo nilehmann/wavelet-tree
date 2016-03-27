@@ -12,7 +12,6 @@
 #include "bitmap.hpp"
 #include <iostream>
 #include "utils.hpp"
-#include "wavelet-tree-pointers.hpp"
 #include <boost/timer/timer.hpp>
 using namespace boost::timer;
 vector<double> sigmas = {1.0, .75, .5, .25};
@@ -22,31 +21,34 @@ vector<int> sizes = {100,
                      100000,
                      1000000};
 
+void dummyfunction();
+
 template<class Wavelet>
-void runRankQuery(const Wavelet &wave,
+void runRankQuery(Wavelet &wave,
                   const vector<tuple<int, int, int, int>> &queries,
                   vector<int> &res) {
-  int i = 0;
-  for (auto query : queries)
-    res[i++] = wave.rank(get<0>(query), get<1>(query));
-    // wave.rank(get<0>(query), get<1>(query));
+  // int i = 0;
+  for (auto query : queries) {
+    // res[i++] = wave.rank(get<0>(query), get<1>(query));
+    wave.rank(get<0>(query), get<1>(query));
+  }
 }
 template<class Wavelet>
-void runRangeQuery(const Wavelet &wave,
+void runRangeQuery(Wavelet &wave,
                    const vector<tuple<int, int, int, int>> &queries,
                    vector<int> &res) {
-  int i = 0;
-  for (auto query : queries)
-    res[i++] = wave.range(get<0>(query), get<1>(query), get<2>(query), get<3>(query));
-    // wave.range(get<0>(query), get<1>(query), get<2>(query), get<3>(query));
+  // int i = 0;
+  for (auto query : queries) {
+    // res[i++] = wave.range(get<0>(query), get<1>(query), get<2>(query), get<3>(query));
+    wave.range(get<0>(query), get<1>(query), get<2>(query), get<3>(query));
+  }
 }
+
 template<class Wavelet>
 void runQuantileQuery(Wavelet &wave,
                       const vector<tuple<int, int, int, int>> &queries,
                       vector<int> &res) {
-  // int i = 0;
   for (auto query : queries) {
-    // res[i++] = wave.quantile(get<0>(query), get<1>(query), get<2>(query));
     wave.quantile(get<0>(query), get<1>(query), get<2>(query));
   }
 }
@@ -70,7 +72,6 @@ void runQueries(vector<int> seq, int sigma, int query_type,
   timer.stop();
   // cout << 1.0*timer.elapsed().wall/queries.size() << "\n";
   cout << timer.elapsed().wall << "\n";
-  cout << "memory:" << wave.getA() << "\n";
 }
 
 
@@ -116,10 +117,10 @@ int main (int argc, char *argv[]) {
     }
   }
 
-  vector<int> res2;
-  runQueries<WaveMatrix<BitmapRank>>(seq, sigma, query_type, queries, res2);
   vector<int> res1;
   runQueries<WaveTree<BitmapRankVec>>(seq, sigma, query_type, queries, res1);
+  vector<int> res2;
+  runQueries<WaveMatrix<BitmapRankVec>>(seq, sigma, query_type, queries, res2);
   // runQueries<WTNode<BitmapRank>>(seq, sigma, query_type, queries, res1);
 
   // for (int i = 0; i < (int)res1.size(); ++i)

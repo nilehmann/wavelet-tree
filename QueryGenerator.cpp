@@ -21,12 +21,13 @@ vector<double> sigmas = {1, .75, .5, .25};
 
 int nqueries = 1000000;
 
+
 tuple<int, int> genRankQuery(int size, int sigma) {
   uniform_int_distribution<> dis(0, sigma - 1);
   uniform_int_distribution<> dis2(0, size - 1);
 
-  int i = dis2(gen);
-  int c = dis(gen);
+  int i = genUniform(0, size - 1);
+  int c = genUniform(0, sigma - 1);
 
   return make_tuple(c, i);
 }
@@ -36,7 +37,7 @@ tuple<int, int, int> genQuantileQuery(int size) {
   tie(i, j) = genInterval(size);
 
   uniform_int_distribution<> dis(1, intervalLength(i, j));
-  int k = dis(gen);
+  int k = genUniform(1, intervalLength(i,j));
 
   return make_tuple(k, i, j);
 }

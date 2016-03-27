@@ -31,7 +31,7 @@ void testSize(istream &in, ostream &summary, int persize) {
   vector<int> seq;
 
   log.open("logs/s"+to_string(sigma)+"n"+to_string(size));
-  log << "Time [ms]; Memory [MB]\n";
+  // log << "Time [ms]; Memory [MB]\n";
 
   double total_time = 0;
   double total_mem = 0;
@@ -49,7 +49,7 @@ void testSize(istream &in, ostream &summary, int persize) {
     total_mem += mem;
     total_time += millis;
 
-    log << millis << ";" << mem << "\n";
+    // log << millis << ";" << mem << "\n";
   }
   summary << sigma << ";"
           << size << ";"
@@ -130,4 +130,5 @@ int main() {
   summary_wtc.close();
 
   return 0;
+
 }
