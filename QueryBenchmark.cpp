@@ -65,25 +65,32 @@ void runQueries(vector<int> seq, int sigma, int query_type,
 
 
 int main (int argc, char *argv[]) {
-  if (argc < 2) {
-    cout << "Usage: " << argv[0] << " query_type\n";
+  if (argc < 3) {
+    cout << "Usage: " << argv[0] << " query_type structure\n";
     cout << "1: rank\n";
     cout << "2: quantile\n";
     cout << "3: range\n";
+    cout << "1: Wavelet Tree\n";
+    cout << "2: Wavelet Tree Compresed\n";
+    cout << "3: Wavelet Matrix\n";
+    cout << "4: Wavelet Matrix Compressed\n";
     exit(0);
   }
   int query_type = atoi(argv[1]);
+  int istructure = atoi(argv[2]);
+  string structure;
+  switch (istructure) {
+  case 1: structure = "wavelet-tree"; break;
+  case 2: structure = "wavelet-tree-compressed"; break;
+  case 3: structure = "wavelet-matrix"; break;
+  case 4: structure = "wavelet-matrix-compressed"; break;
+  }
 
   string hd = "Size;Sigma;Total time[ns];Total time[ms];nqueries;Avg time[ns]\n";
 
-  ofstream wt_log; wt_log.open("log/wavelet-tree");
-  wt_log  << hd;
-  ofstream wtc_log; wtc_log.open("log/wavelet-tree-compressed");
-  wtc_log << hd;
-  ofstream wm_log; wm_log.open("log/wavelet-matrix");
-  wm_log  << hd;
-  ofstream wmc_log; wmc_log.open("log/wavelet-matrix-compressed");
-  wmc_log << hd;
+  ofstream log; log.open("log/"+structure);
+
+  cout << "Testing " << structure << endl;
 
   for (auto s : sigmas) {
     for (auto size : sizes) {
@@ -117,23 +124,15 @@ int main (int argc, char *argv[]) {
 
       cout << "Size: " << size << "\n";
       cout << "Sigma: " << sigma << "\n";
-      cout << "Testing Wavelet Tree..." << endl;
-      runQueries<WaveTree<BitmapRankVec>>(seq, sigma, query_type, wt_log, queries);
-
-      cout << "Testing Wavelet Tree Compressed..." << endl;
-      runQueries<WaveTree<BitmapRank>>(seq, sigma, query_type, wtc_log, queries);
-
-      cout << "Testing Wavelet Matrix..." << endl;
-      runQueries<WaveMatrix<BitmapRankVec>>(seq, sigma, query_type, wm_log, queries);
-
-      cout << "Testing Wavelet Matrix Compressed..." << endl;
-      runQueries<WaveMatrix<BitmapRank>>(seq, sigma, query_type, wmc_log, queries);
+      switch (istructure) {
+      case 1: runQueries<WaveTree<BitmapRankVec>>(seq, sigma, query_type, log, queries); break;
+      case 2: runQueries<WaveTree<BitmapRank>>(seq, sigma, query_type, log, queries); break;
+      case 3: runQueries<WaveMatrix<BitmapRankVec>>(seq, sigma, query_type, log, queries); break;
+      case 4: runQueries<WaveMatrix<BitmapRank>>(seq, sigma, query_type, log, queries); break;
+      }
 
       cout << endl;
     }
   }
-  wt_log.close();
-  wtc_log.close();
-  wm_log.close();
-  wmc_log.close();
+  log.close();
 }
