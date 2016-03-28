@@ -24,54 +24,43 @@ vector<int> sizes = {100,
 void dummyfunction();
 
 template<class Wavelet>
-void runRankQuery(Wavelet &wave,
-                  const vector<tuple<int, int, int, int>> &queries,
-                  vector<int> &res) {
-  // int i = 0;
-  for (auto query : queries) {
-    // res[i++] = wave.rank(get<0>(query), get<1>(query));
-    wave.rank(get<0>(query), get<1>(query));
-  }
-}
-template<class Wavelet>
-void runRangeQuery(Wavelet &wave,
-                   const vector<tuple<int, int, int, int>> &queries,
-                   vector<int> &res) {
-  // int i = 0;
-  for (auto query : queries) {
-    // res[i++] = wave.range(get<0>(query), get<1>(query), get<2>(query), get<3>(query));
-    wave.range(get<0>(query), get<1>(query), get<2>(query), get<3>(query));
-  }
+void runRankQuery(Wavelet &wave, tuple<int, int, int, int> query) {
+  wave.rank(get<0>(query), get<1>(query));
 }
 
 template<class Wavelet>
-void runQuantileQuery(Wavelet &wave,
-                      const vector<tuple<int, int, int, int>> &queries,
-                      vector<int> &res) {
-  for (auto query : queries) {
-    wave.quantile(get<0>(query), get<1>(query), get<2>(query));
-  }
+void runRangeQuery(Wavelet &wave,
+                   tuple<int, int, int, int> query) {
+  wave.range(get<0>(query), get<1>(query), get<2>(query), get<3>(query));
+}
+
+template<class Wavelet>
+void runQuantileQuery(Wavelet &wave, tuple<int, int, int, int> query) {
+  wave.quantile(get<0>(query), get<1>(query), get<2>(query));
 }
 
 template<class Wavelet>
 void runQueries(vector<int> seq, int sigma, int query_type,
-                const vector<tuple<int, int, int, int>> &queries,
-                vector<int> &res) {
+                ostream &log,
+                const vector<tuple<int, int, int, int>> &queries) {
   cpu_timer timer;
   Wavelet wave(seq, sigma);
 
-  res.resize(queries.size());
-
   timer.start();
-  // for (int i = 0; i < 100; ++i)
+  for (auto query : queries)
     switch (query_type) {
-    case 1: runRankQuery(wave, queries, res); break;
-    case 2: runQuantileQuery(wave, queries, res); break;
-    case 3: runRangeQuery(wave, queries, res); break;
+    case 1: runRankQuery(wave, query); break;
+    case 2: runQuantileQuery(wave, query); break;
+    case 3: runRangeQuery(wave, query); break;
     }
   timer.stop();
-  // cout << 1.0*timer.elapsed().wall/queries.size() << "\n";
-  cout << timer.elapsed().wall << "\n";
+  log << seq.size() << ";"
+      << sigma << ";"
+      << timer.elapsed().wall << ";"
+      << timer.elapsed().wall/1000000.0 << ";"
+      << queries.size() << ";"
+      << 1.0*timer.elapsed().wall/queries.size() << ";"
+      << "\n";
 }
 
 
@@ -85,45 +74,66 @@ int main (int argc, char *argv[]) {
   }
   int query_type = atoi(argv[1]);
 
-  double s = 0.5;
-  int size = 1000000;
-  char buf[256];
-  sprintf(buf, "%.2f", s);
+  string hd = "Size;Sigma;Total time[ns];Total time[ms];nqueries;Avg time[ns]\n";
 
-  int sigma = size*s;
+  ofstream wt_log; wt_log.open("log/wavelet-tree");
+  wt_log  << hd;
+  ofstream wtc_log; wtc_log.open("log/wavelet-tree-compressed");
+  wtc_log << hd;
+  ofstream wm_log; wm_log.open("log/wavelet-matrix");
+  wm_log  << hd;
+  ofstream wmc_log; wmc_log.open("log/wavelet-matrix-compressed");
+  wmc_log << hd;
 
-  ifstream in;
-  in.open("s"+string(buf)+"n"+to_string(size));
-  size = rawRead<int>(in); // Size
-  sigma = rawRead<int>(in); // Sigma
-  vector<int> seq;
-  rawRead(in, seq, size);
+  for (auto s : sigmas) {
+    for (auto size : sizes) {
+      char buf[256];
+      sprintf(buf, "%.2f", s);
+      int sigma = size*s;
 
-  int nqueries = rawRead<int>(in);
-  cout << size << " " << sigma << " " << nqueries << "\n";
-  vector<tuple<int, int, int, int>> queries(nqueries);
-  for (int i = 0; i < nqueries; ++i) {
-    switch (query_type) {
-    case 1: queries[i] = tuple_cat(rawRead<tuple<int, int>>(in),
-                                   make_tuple(0, 0));
-      break;
-    case 2: queries[i] = tuple_cat(rawRead<tuple<int, int, int>>(in),
-                                   make_tuple(0));
-      break;
-    case 3: queries[i] = tuple_cat(rawRead<tuple<int, int, int, int>>(in));
-      break;
-    default:
-      cout << "Invalid query\n";
+      ifstream in;
+      in.open("s"+string(buf)+"n"+to_string(size));
+      size = rawRead<int>(in); // Size
+      sigma = rawRead<int>(in); // Sigma
+      vector<int> seq;
+      rawRead(in, seq, size);
+
+      int nqueries = rawRead<int>(in);
+      vector<tuple<int, int, int, int>> queries(nqueries);
+      for (int i = 0; i < nqueries; ++i) {
+        switch (query_type) {
+        case 1: queries[i] = tuple_cat(rawRead<tuple<int, int>>(in),
+                                      make_tuple(0, 0));
+          break;
+        case 2: queries[i] = tuple_cat(rawRead<tuple<int, int, int>>(in),
+                                      make_tuple(0));
+          break;
+        case 3: queries[i] = tuple_cat(rawRead<tuple<int, int, int, int>>(in));
+          break;
+        default:
+          cout << "Invalid query\n";
+        }
+      }
+
+      cout << "Size: " << size << "\n";
+      cout << "Sigma: " << sigma << "\n";
+      cout << "Testing Wavelet Tree..." << endl;
+      runQueries<WaveTree<BitmapRankVec>>(seq, sigma, query_type, wt_log, queries);
+
+      cout << "Testing Wavelet Tree Compressed..." << endl;
+      runQueries<WaveTree<BitmapRank>>(seq, sigma, query_type, wtc_log, queries);
+
+      cout << "Testing Wavelet Matrix..." << endl;
+      runQueries<WaveMatrix<BitmapRankVec>>(seq, sigma, query_type, wm_log, queries);
+
+      cout << "Testing Wavelet Matrix Compressed..." << endl;
+      runQueries<WaveMatrix<BitmapRank>>(seq, sigma, query_type, wmc_log, queries);
+
+      cout << endl;
     }
   }
-
-  vector<int> res1;
-  runQueries<WaveTree<BitmapRankVec>>(seq, sigma, query_type, queries, res1);
-  vector<int> res2;
-  runQueries<WaveMatrix<BitmapRankVec>>(seq, sigma, query_type, queries, res2);
-  // runQueries<WTNode<BitmapRank>>(seq, sigma, query_type, queries, res1);
-
-  // for (int i = 0; i < (int)res1.size(); ++i)
-  //   if(res1[i] != res2[i])
-  //     cout << res1[i] << " " << res2[i] << endl;
+  wt_log.close();
+  wtc_log.close();
+  wm_log.close();
+  wmc_log.close();
 }
