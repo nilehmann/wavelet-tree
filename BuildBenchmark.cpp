@@ -21,7 +21,7 @@ vector<double> sigmas = {1, .75, .5, .25};
 
 template<class Wavelet>
 void testSize(istream &in, ostream &summary, int persize) {
-  ofstream log;
+  // ofstream log;
   cpu_timer timer;
   int size = rawRead<int>(in);
   int sigma = rawRead<int>(in);
@@ -30,7 +30,7 @@ void testSize(istream &in, ostream &summary, int persize) {
 
   vector<int> seq;
 
-  log.open("logs/s"+to_string(sigma)+"n"+to_string(size));
+  // log.open("logs/s"+to_string(sigma)+"n"+to_string(size));
   // log << "Time [ms]; Memory [MB]\n";
 
   double total_time = 0;
@@ -41,7 +41,6 @@ void testSize(istream &in, ostream &summary, int persize) {
     timer.start();
     Wavelet wavelet(seq, sigma);
     timer.stop();
-
 
     auto millis = timer.elapsed().wall/1000000.0;
     double mem = wavelet.memory()/1024.0/1024;
@@ -61,7 +60,7 @@ void testSize(istream &in, ostream &summary, int persize) {
   cout << "Total time [ms]: " << total_time << "\n"
        << "Average time [ms]: " << total_time/persize << "\n\n";
 
-  log.close();
+  // log.close();
 }
 
 int main() {
@@ -76,10 +75,11 @@ int main() {
   summary_wtc.open("wavelet-tree-compression");
   summary_wtc << "Sigma;Size;Number;Total time[ms];Avg Time[ms];Avg Mem[MB]\n";
 
-  for (auto s : {1.0}) {
+  for (auto s : sigmas) {
     char buf[256];
     sprintf(buf, "%.2f", s);
     in.open("s"+string(buf));
+
 
     int sizes = rawRead<int>(in);
     int persize = rawRead<int>(in);

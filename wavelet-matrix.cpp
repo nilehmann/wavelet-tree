@@ -11,22 +11,19 @@
 #include <algorithm>
 #include "utils.hpp"
 #include "bitmap.hpp"
+#include "wavelet-matrix.hpp"
 using namespace std;
 
 typedef unsigned int uint;
 
 
-template<class Bitmap>
-struct WaveMatrix {
-  uint height;
-  vector<Bitmap> B;
-  vector<int> z;
-  int a;
 
-  WaveMatrix(vector<int> &S) :
+  template<class Bitmap>
+  WaveMatrix<Bitmap>::WaveMatrix(vector<int> &S) :
     WaveMatrix(S, *max_element(S.begin(), S.end()) + 1) {}
 
-  WaveMatrix(vector<int> &S, int sigma)
+  template<class Bitmap>
+  WaveMatrix<Bitmap>::WaveMatrix(vector<int> &S, int sigma)
     : height(log2(sigma - 1)),
       B(height), z(height) {
     for (uint l = 0; l < height; ++l) {
@@ -42,7 +39,8 @@ struct WaveMatrix {
     }
   }
 
-  int memory() {
+  template<class Bitmap>
+  int WaveMatrix<Bitmap>::memory() {
     int mem = 0;
     mem += sizeof(vector<Bitmap>);
     for (int l = 0; l < (int)B.size(); ++l)
@@ -58,7 +56,8 @@ struct WaveMatrix {
 
   // Find the k-th smallest element. The smallest element is k=1
   int b = 0 ;
-  int quantile(int k, int i, int j) {
+  template<class Bitmap>
+  int WaveMatrix<Bitmap>::quantile(int k, int i, int j) {
     int element = 0;
     for (uint l = 0; l < height; ++l) {
       int r = B[l].rank0(i, j);
@@ -76,7 +75,8 @@ struct WaveMatrix {
   }
 
   // Count occurrences of number c until position i
-  int rank(int c, int i) {
+  template<class Bitmap>
+  int WaveMatrix<Bitmap>::rank(int c, int i) {
     int p = -1;
     for (uint l = 0; l < height; ++l) {
       if (get_bit(c, height - l - 1)) {
@@ -93,11 +93,13 @@ struct WaveMatrix {
   // Count number of occurrences of numbers in the range [a, b]
   // present in the sequence at range [i, j], ie, if representing a grid it
   // counts number of points in the specified rectangle.
-  int range(int i, int j, int a, int b) {
-    return range(i, j, a, b, 0, (1 << height)-1);
+  template<class Bitmap>
+  int WaveMatrix<Bitmap>::range(int i, int j, int a, int b) {
+    return range(i, j, a, b, 0, (1 << height)-1, 0);
   }
 
-  int range(int i, int j, int a, int b, int L, int U, int l=0) {
+  template<class Bitmap>
+  int WaveMatrix<Bitmap>::range(int i, int j, int a, int b, int L, int U, int l) {
     if (b < L || U < a)
         return 0;
 
@@ -112,7 +114,6 @@ struct WaveMatrix {
       return left + right;
     }
   }
-};
 
 template struct WaveMatrix<BitmapRank>;
 template struct WaveMatrix<BitmapRankVec>;

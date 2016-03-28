@@ -4,9 +4,15 @@
 #include<algorithm>
 #include <iostream>
 using namespace std;
+typedef vector<int>::iterator iter;
 
 template<class Bitmap>
 class WaveTree {
+  vector<Bitmap> r0; int n, s;
+  mutable int q, w;
+private:
+  void build(iter b, iter e, int l, int r, int u);
+  int range(int i, int j, int l, int r, int u);
 public:
   int memory();
   //arr[i] in [0,sigma)

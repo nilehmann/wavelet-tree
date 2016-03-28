@@ -41,7 +41,7 @@ struct WaveMatrix {
   // counts number of points in the specified rectangle.
   int range(int i, int j, int a, int b);
 
-  int range(int i, int j, int a, int b, int L, int U, int l=0);
+  int range(int i, int j, int a, int b, int L, int U, int l);
 };
 
 #endif

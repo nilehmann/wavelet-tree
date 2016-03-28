@@ -15,8 +15,9 @@ struct BitmapRankVec {
 
   void set(int i, bool b) {
     count[i] = b;
-    if (i > 0)
+    if (i > 0) {
       count[i] += count[i-1];
+    }
   }
 
   int memory() const {

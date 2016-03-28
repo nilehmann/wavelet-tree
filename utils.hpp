@@ -57,5 +57,12 @@ void rawRead(istream &stream, vector<T> &vec, int n) {
     vec[i] = rawRead<T>(stream);
 }
 
+ostream& operator<<(ostream& stream, tuple<int, int> t);
+
+ostream& operator<<(ostream& stream, tuple<int, int, int> t);
+
+ostream& operator<<(ostream& stream, tuple<int, int, int, int> t);
+
+ostream& operator<<(ostream& stream, const vector<int> &vec);
 
 #endif
