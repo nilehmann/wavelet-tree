@@ -1,110 +1,88 @@
 #include<vector>
 #include<algorithm>
-#include <iostream>
 #include "bitmap.hpp"
-#include "wavelet-tree.hpp"
 using namespace std;
+typedef vector<int>::iterator iter;
 
-// vector<Bitmap> r0; int n, s;
-// vector<vector<int>> r0; int n, s;
+//Wavelet tree with succinct representation of bitmaps
+struct WaveTreeSucc {
+  vector<vector<int> > C; int s;
 
-template<class Bitmap>
-void WaveTree<Bitmap>::build(iter b, iter e, int l, int r, int u) {
-  if (l == r)
-    return;
-  int m = (l+r)/2;
-  // r0[u].reserve(e-b+1); r0[u].push_back(0);
-  // for (iter it = b; it != e; ++it)
-  //   r0[u].push_back(r0[u].back() + (*it<=m));
-
-  r0[u].resize(e-b+1);
-  int i; iter it;
-  for (it = b, i=0; it !=e; ++it, ++i) {
-    r0[u].set(i, *it<=m);
+  // sigma = size of the alphabet, ie., one more than the maximum element
+  // in S.
+  WaveTreeSucc(vector<int> &A, int sigma) : C(sigma*2), s(sigma) {
+    build(A.begin(), A.end(), 0, s-1, 1);
   }
-  r0[u].build_rank();
 
-  iter p = stable_partition(b, e, [=](int i){
-      return i<=m;});
+  void build(iter b, iter e, int L, int U, int u) {
+    if (L == U)
+      return;
+    int M = (L+U)/2;
 
-  build(b, p, l, m, u*2);
-  build(p, e, m+1, r, u*2+1);
-}
+    // C[u][i] contains number of zeros until position i-1: [0,i)
+    C[u].reserve(e-b+1); C[u].push_back(0);
+    for (iter it = b; it != e; ++it)
+      C[u].push_back(C[u].back() + (*it<=M));
 
-template<class Bitmap>
-int WaveTree<Bitmap>::memory() {
-  int mem = 0;
-  mem += 2*sizeof(int);
+    iter p = stable_partition(b, e, [=](int i){return i<=M;});
 
-  mem += sizeof(vector<Bitmap>);
-  for (int i = 0; i < (int)r0.size(); ++i)
-    mem += r0[i].memory();
-  return mem;
-}
-
-template<class Bitmap>
-WaveTree<Bitmap>::WaveTree(vector<int> &arr, int sigma) {
-  n = arr.size(); s = sigma;
-  r0.resize(s*2);
-  build(arr.begin(), arr.end(), 0, s-1, 1);
-}
-
-//k in [1,n], [i,j] is 0-indexed, -1 if error
-template<class Bitmap>
-int WaveTree<Bitmap>::quantile(int k, int i, int j) {
-  j++;
-  // if (k < 1 or k > j-i)
-  //   return -1;
-  int l = 0, r = s-1, u = 1, m, ri, rj;
-  while (l != r) {
-    m = (l+r)/2;
-    // ri = r0[u][i]; rj = r0[u][j]; u*=2;
-    ri = r0[u].rank1(i-1); rj = r0[u].rank1(j-1); u*=2;
-    if (k <= rj-ri)
-      i = ri, j = rj, r = m;
-    else
-      k -= rj-ri, i -= ri, j -= rj,
-        l = m+1, ++u;
+    build(b, p, L, M, u*2);
+    build(p, e, M+1, U, u*2+1);
   }
-  return r;
-}
 
-//counts numbers in [a,b] in positions [i,j]
-template<class Bitmap>
-int WaveTree<Bitmap>::range(int i, int j, int a, int b) {
-  if (b < a or j < i)
-    return 0;
-  q = a; w = b;
-  return range(i, j+1, 0, s-1, 1);
-}
-
-template<class Bitmap>
-int WaveTree<Bitmap>::range(int i, int j, int a, int b, int u) {
-  if (b < q or w < a)
-    return 0;
-  if (q <= a and b <= w)
-    return j-i;
-  // int m = (a+b)/2, ri = r0[u][i], rj = r0[u][j];
-  int m = (a+b)/2, ri = r0[u].rank1(i-1), rj = r0[u].rank1(j-1);
-  return range(ri, rj, a, m, u*2) +
-    range(i-ri, j-rj, m+1, b, u*2+1);
-}
-
-//count occurrences of x in positions [0,i]
-template<class Bitmap>
-int WaveTree<Bitmap>::rank(int x, int i) {
-  i++;
-  int l = 0, r = s-1, u = 1, m, z;
-  while (l != r) {
-    m = (l+r)/2;
-    // z = r0[u][i]; u*=2;
-    z = r0[u].rank1(i-1); u*=2;
-    if (x <= m)
-      i = z, r = m;
-    else
-      i -= z, l = m+1, ++u;
+  // Count occurrences of number c until position i.
+  // ie, occurrences of c in positions [i,j]
+  int rank(int c, int i) const {
+    // Internally we consider an interval open on the left: [0, i)
+    i++;
+    int L = 0, U = s-1, u = 1, M, r;
+    while (L != U) {
+      M = (L+U)/2;
+      r = C[u][i]; u*=2;
+      if (c <= M)
+        i = r, U = M;
+      else
+        i -= r, L = M+1, ++u;
+    }
+    return i;
   }
-  return i;
-}
-template class WaveTree<BitmapRank>;
-template class WaveTree<BitmapRankVec>;
+
+  // Find the k-th smallest element in positions [i,j].
+  // The smallest element is k=1
+  int quantile(int k, int i, int j) const {
+    // internally we we consider an interval open on the left:  [i, j)
+    j++;
+    int L = 0, U = s-1, u = 1, M, ri, rj;
+    while (L != U) {
+      M = (L+U)/2;
+      ri = C[u][i]; rj = C[u][j]; u*=2;
+      if (k <= rj-ri)
+        i = ri, j = rj, U = M;
+      else
+        k -= rj-ri, i -= ri, j -= rj,
+          L = M+1, ++u;
+    }
+    return U;
+  }
+
+  // Count number of occurrences of numbers in the range [a, b]
+  // present in the sequence in positions [i, j], ie, if representing a grid it
+  // counts number of points in the specified rectangle.
+  mutable int L, U;
+  int range(int i, int j, int a, int b) const {
+    if (b < a or j < i)
+      return 0;
+    L = a; U = b;
+    return range(i, j+1, 0, s-1, 1);
+  }
+
+  int range(int i, int j, int a, int b, int u) const {
+    if (b < L or U < a)
+      return 0;
+    if (L <= a and b <= U)
+      return j-i;
+    int M = (a+b)/2, ri = C[u][i], rj = C[u][j];
+    return range(ri, rj, a, M, u*2) +
+      range(i-ri, j-rj, M+1, b, u*2+1);
+  }
+};
