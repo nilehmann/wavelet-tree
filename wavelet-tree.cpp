@@ -31,7 +31,7 @@ struct WaveTreeSucc {
   }
 
   // Count occurrences of number c until position i.
-  // ie, occurrences of c in positions [i,j]
+  // ie, occurrences of c in positions [0,i]
   int rank(int c, int i) const {
     // Internally we consider an interval open on the left: [0, i)
     i++;

@@ -43,7 +43,7 @@ struct WaveMatrixSucc {
   }
 
   // Count occurrences of number c until position i.
-  // ie, occurrences of c in positions [i,j]
+  // ie, occurrences of c in positions [0,i]
   int rank(int c, int i) const {
     int p = -1;
     for (uint l = 0; l < height; ++l) {
