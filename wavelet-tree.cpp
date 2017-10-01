@@ -33,7 +33,7 @@ struct WaveTreeSucc {
   // Count occurrences of number c until position i.
   // ie, occurrences of c in positions [0,i]
   int rank(int c, int i) const {
-    // Internally we consider an interval open on the left: [0, i)
+    // Internally we consider an interval open on the right: [0, i)
     i++;
     int L = 0, U = s-1, u = 1, M, r;
     while (L != U) {
@@ -50,7 +50,7 @@ struct WaveTreeSucc {
   // Find the k-th smallest element in positions [i,j].
   // The smallest element is k=1
   int quantile(int k, int i, int j) const {
-    // internally we we consider an interval open on the left:  [i, j)
+    // internally we we consider an interval open on the right:  [i, j)
     j++;
     int L = 0, U = s-1, u = 1, M, ri, rj;
     while (L != U) {
