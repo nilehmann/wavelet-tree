@@ -1,6 +1,5 @@
 #include<vector>
 #include<algorithm>
-#include "bitmap.hpp"
 using namespace std;
 typedef vector<int>::iterator iter;
 
